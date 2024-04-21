@@ -70,20 +70,10 @@ CrashDataFrame = create_dagster_pandas_dataframe_type(
 
 def transform_crash(start):
     
-    client = MongoClient(mongo_connection_string)
-    
-
+    client = MongoClient(mongo_connection_string)    
     data = client["Project_2"]
-    
     collect = data["C1"]
     
-
-   #crash_df = pd.json_normalize(list(collect.C1.find({},{"_id": 0})))
-    
-   #crash_datatypes = dict(
-   #    zip(crash_df.columns, [object]*len(crash_df.columns))
-   #)
-    #crash_df=pd.DataFrame(list(collect.find(({},{"_id": 0}))))
     query = {}
     projection = {"_id": 0}
     data = list(collect.find(query, projection))
@@ -100,15 +90,12 @@ def transform_crash(start):
 def load(crash_df):
     try:
         engine = create_engine(postgres_connection_string,poolclass=NullPool)
-        
-        
+                
         database_datatypes = dict(
             zip(crash_df.columns,[VARCHAR]*len(crash_df.columns))
         )
         
         with engine.connect() as conn:
-            
-
             rowcount = crash_df.to_sql(
                 name="crashtable",
                 schema="public",
@@ -119,19 +106,12 @@ def load(crash_df):
             )
             logger.info("{} records loaded".format(rowcount))
             
-
-            
-        # Close the connection to PostgreSQL and dispose of 
-        # the connection engine
-        engine.dispose(close=True)
-
+        engine.dispose(close=True)        
         
-        # Return the number of rows inserted
         return crash_df
         #return None
         #return rowcount > 0
     
-    # Trap and handle any relevant errors
     except exc.SQLAlchemyError as error:
         logger.error("Error: %s" % error)
         return False
